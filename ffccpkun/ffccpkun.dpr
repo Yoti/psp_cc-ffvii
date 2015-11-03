@@ -18,8 +18,8 @@ const
   OUTPUT_CHUNK_SIZE:        Word = 1024;
 
   file_extension:           String = 'raw';
-  input_directory:          String = 'data';
-  output_directory:         String = 'output';
+  input_directory:          String = ''; // 'data\'
+  output_directory:         String = 'output\';
   index_filename:           String = 'discimg.fse';
   data_filename:            String = 'discimg.pkg';
   list_filename:            String = 'index.fls';
@@ -58,7 +58,7 @@ begin
   //if (ParamStr(1) = 'p')
   //then Mode:='pack';
 
-  current_filename:=input_directory + '\' + index_filename;
+  current_filename:=input_directory + index_filename;
   if (FileExists(ExtractFilePath(ParamStr(0)) + current_filename) = False) then
     begin
       WriteLn('error: no "' + current_filename + '" file');
@@ -72,7 +72,7 @@ begin
       Reset(iIndexF, 4);
     end;
 
-  current_filename:=input_directory + '\' + data_filename;
+  current_filename:=input_directory + data_filename;
   if (FileExists(ExtractFilePath(ParamStr(0)) + current_filename) = False) then
     begin
       WriteLn('error: no "' + current_filename + '" file');
@@ -95,7 +95,7 @@ begin
   while not Eof(iIndexF) do { количество файлов неизвестно }
   begin
     output_filename:=IntToStrEx(count, 8) + '.' + file_extension;
-    output_filepath:=output_directory + '\' + output_filename;
+    output_filepath:=output_directory + output_filename;
     BlockRead(iIndexF, FileIndex.offset, 1);
     real_offset:=FileIndex.offset * SECTOR_DATA_SIZE;
     BlockRead(iIndexF, FileIndex.length, 1);
@@ -135,11 +135,10 @@ begin
   CloseFile(iIndexF);
   CloseFile(iDataF);
   //CloseFile(fList);
-  fListList.SaveToFile(output_directory + '\' + list_filename);
+  fListList.SaveToFile(output_directory + list_filename);
   fListList.Destroy;
 
   WriteLn('All done, press [enter] to exit...');
   ReadLn;
   Halt(0);
 end.
- 
