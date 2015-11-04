@@ -24,13 +24,16 @@ const
   data_filename:            String = 'discimg.pkg';
   list_filename:            String = 'index.fls';
 
+  SUCCESS = 0;
+  NO_FILE = 1;
+  UNKNOWN = 2;
+
 var
   FS:                       TFileStream;
   current_filename:         String;
   output_filename:          String;
   output_filepath:          String;
   iIndexF:                  File;
-//fList:                    TextFile;
   fListList:                TStringList;
   iDataF:                   File of Byte;
   oFileBuffer:              Array of Byte;
@@ -55,16 +58,13 @@ end;
 begin
   WriteLn('Final Fantasy 7: Crisis Core pkg extractor by Yoti');
 
-  //if (ParamStr(1) = 'p')
-  //then Mode:='pack';
-
   current_filename:=input_directory + index_filename;
   if (FileExists(ExtractFilePath(ParamStr(0)) + current_filename) = False) then
     begin
       WriteLn('error: no "' + current_filename + '" file');
       WriteLn('= press [enter] to exit =');
       ReadLn;
-      Halt(1);
+      Halt(NO_FILE);
     end
   else
     begin
@@ -78,15 +78,13 @@ begin
       WriteLn('error: no "' + current_filename + '" file');
       WriteLn('= press [enter] to exit =');
       ReadLn;
-      Halt(2);
+      Halt(UNKNOWN);
     end
   else
     begin
       AssignFile(iDataF, current_filename);
-      Reset(iDataF); { <- побайтовое чтение из контейнера }
+      Reset(iDataF); { <- побайтовое чтение из контейнера, МЕДЛЕННО }
       MkDir(ExtractFilePath(ParamStr(0)) + output_directory);
-      //AssignFile(fList, output_directory + '\' + list_filename);
-      //ReWrite(fList);
       fListList:=TStringList.Create;
       fListList.Clear;
     end;
@@ -101,14 +99,10 @@ begin
     BlockRead(iIndexF, FileIndex.length, 1);
     BlockRead(iIndexF, FileIndex.padding, 1);
 
-    if (FileIndex.length > 0)
-    //then WriteLn(fList, output_filepath)
-    //else WriteLn(fList, 'null');
-    then fListList.Add(output_filepath)
-    else fListList.Add('null');
-
     if (FileIndex.length > 0) then
       begin
+        fListList.Add(output_filepath);
+
         Write('file: ' + output_filename);
         Write(', from: 0x' + IntToHex(real_offset, 8));
         Write(', size: 0x' + IntToHex(FileIndex.length, 8));
@@ -117,7 +111,7 @@ begin
 
         SetLength(oFileBuffer, FileIndex.length);
         //WriteLn('debug: oFileBuffer = ' + IntToStr(Length(oFileBuffer)) + '/' + IntToHex(Length(oFileBuffer), 8) + ' byte(s)'); { <- тут всё окей }
-        { побайтовое чтение из контейнера в буфер - МЕДЛЕННО }
+        { побайтовое чтение из контейнера в буфер, МЕДЛЕННО }
         for delphiCount:=0 to FileIndex.length-1 do
           begin
             Seek(iDataF, real_offset + delphiCount);
@@ -129,16 +123,20 @@ begin
         FreeAndNil(FS);
 
         inc(count);
+      end
+    else
+      begin
+        fListList.Add('null');
+        inc(count); // сохранять нумерацию, сомвместимую с xpert2 плагинами
       end;
   end;
 
   CloseFile(iIndexF);
   CloseFile(iDataF);
-  //CloseFile(fList);
   fListList.SaveToFile(output_directory + list_filename);
   fListList.Destroy;
 
   WriteLn('All done, press [enter] to exit...');
   ReadLn;
-  Halt(0);
+  Halt(SUCCESS);
 end.
