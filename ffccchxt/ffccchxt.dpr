@@ -94,7 +94,10 @@ begin
       // проверка на '_unknw.raw' для того, чтобы исключить обработку jp файлов
       // ВНИМАНИЕ: лучше бы проверять на заголовок, но пока и так сойдёт
       // подходит для любого анпакера, который пропускает пустые файлы (US UMD)
-      if GetParamStr('translt') = True
+      /// в связи с тем, что я переписал анпакер, это больше не требуется
+      /// пока оставлено как заметка, код будет удалён в следующих версиях
+      /// список фалйов получен сравнением раннего перевода с чистым образом 
+      {if GetParamStr('translt') = True
       then
         begin                               // сишный анпакер                               // мой анпакер
           if ((ExtractFileName(ParamStr(1)) = '00001.raw') or (ExtractFileName(ParamStr(1)) = '00000001.raw')) and (s = '_unknw.raw') then s:='_unknw.eng';
@@ -112,9 +115,9 @@ begin
           if ((ExtractFileName(ParamStr(1)) = '08698.raw') or (ExtractFileName(ParamStr(1)) = '00008698.raw')) and (s = '_unknw.raw') then s:='_unknw.eng';
           if ((ExtractFileName(ParamStr(1)) = '08699.raw') or (ExtractFileName(ParamStr(1)) = '00008699.raw')) and (s = '_unknw.raw') then s:='_unknw.eng';
           if ((ExtractFileName(ParamStr(1)) = '08700.raw') or (ExtractFileName(ParamStr(1)) = '00008700.raw')) and (s = '_unknw.raw') then s:='_unknw.eng';
-        end;
+        end;}
 
-      if GetParamStr('no_name') = False
+      if (GetParamStr('no_name') = False)
       then WriteLn(ExtractFileName(ParamStr(1)) + ' -> ' + ChangeFileExt(ParamStr(1), s));
 
       if (s <> '_unknw.raw')
