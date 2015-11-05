@@ -158,7 +158,7 @@ begin
   if FileExists(ParamStr(1)) = True then
     begin
       AssignFile(f, ParamStr(1));
-      Reset(f, 4);
+      Reset(f, 4); // считывем по четыре байта
       AssignFile(FileForScriptDump, ChangeFileExt(ParamStr(1), '_Script.txt'));
       ReWrite(FileForScriptDump);
 
