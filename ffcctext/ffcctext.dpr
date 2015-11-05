@@ -159,7 +159,7 @@ begin
       Halt(2); // error in file
     end;
 
-  WriteLn('= press [enter] to exit =');
+  WriteLn('All done, press [enter] to exit...');
   ReadLn;
   Halt(0); // no error
 end.
