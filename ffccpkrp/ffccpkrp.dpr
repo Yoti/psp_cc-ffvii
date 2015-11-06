@@ -21,42 +21,40 @@ var
 begin
   WriteLn('Crisis Core -Final Fantasy VII- pkg repacker by Yoti');
 
-  if (ParamCount <> 1)
+  if (FileExists(list_filename) = False)
   then
     begin
-      WriteLn('usage: ' + ExtractFileName(ParamStr(0)) + ' ' + list_filename);
+      WriteLn('[e]: ' + list_filename + ' not exists');
       WriteLn; ReadLn;
-
       Halt(NO_FILE);
     end
   else
     begin
-      if (FileExists(list_filename) = True)
-      then
+      FileListFromIndex:=TStringList.Create;
+      FileListFromIndex.Clear;
+      FileListFromIndex.LoadFromFile(list_filename);
+
+      for i:=0 to FileListFromIndex.Count-1
+      do
         begin
-          FileListFromIndex:=TStringList.Create;
-          FileListFromIndex.Clear;
-          FileListFromIndex.LoadFromFile(list_filename);
-
-          for i:=0 to FileListFromIndex.Count
-          do
+          if (FileExists(FileListFromIndex.Strings[i]) = False)
+          and(FileListFromIndex.Strings[i] <> 'null')
+          then
             begin
-              if (FileExists(FileListFromIndex.Strings[i]) = False)
-              then
-                begin
-                  Halt(UNKNOWN);
-                  WriteLn('error: ' + FileListFromIndex.Strings[i] + ' not exists');
-                  WriteLn; ReadLn;
-                end;
+              WriteLn('[e]: ' + FileListFromIndex.Strings[i] + ' not exists');
+              WriteLn; ReadLn;
+              Halt(UNKNOWN);
+            end
+          else
+            begin
+              WriteLn('[i]: ' + FileListFromIndex.Strings[i] + ' found');
             end;
+        end;
 
-          FileListFromIndex.Destroy;          
-        end
-      else
-        Halt(NO_FILE);
-        WriteLn; ReadLn;
+      FileListFromIndex.Destroy;
     end;
 
-  Halt(SUCCESS);
+  WriteLn('[i]: All done!');
   WriteLn; ReadLn;
+  Halt(SUCCESS);
 end.
