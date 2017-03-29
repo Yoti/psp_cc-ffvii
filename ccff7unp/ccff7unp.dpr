@@ -10,8 +10,8 @@ uses
 const
   SECTOR: Cardinal = $800;
 
-  IN_DIR: String = 'data\'; // USRDIR
-  OUT_DIR: String = 'output\';
+  IN_DIR: String = 'USRDIR\';
+  OUT_DIR: String = 'discimg\';
   OUT_EXT: String = '.raw';
 
   FSE_TABLE: String = 'discimg.fse';
