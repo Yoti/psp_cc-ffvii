@@ -103,7 +103,7 @@ begin
       begin
         fListList.Add(output_filepath);
 
-        Write('file: ' + output_filename);
+        Write('file: ' + IntToStrEx(count, 8));
         Write(', from: 0x' + IntToHex(real_offset, 8));
         Write(', size: 0x' + IntToHex(FileIndex.length, 8));
         //Write(', pad.: 0x' + IntToHex(FileIndex.padding, 8)); { <- всегда ноли }
