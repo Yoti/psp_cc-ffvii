@@ -13,13 +13,13 @@ const
   PADDING: Cardinal = $00000000;
 
   IN_EXT: String = '.raw';
-  IN_DIR: String = 'output\';
+  IN_DIR: String = 'discimg\';
   OUT_FSE_TABLE: String = 'discimg_new.fse';
   OUT_PKG_FILES: String = 'discimg_new.pkg';
 
 var
-  NAME: Cardinal;   // us=0..24022, eu=0..11048, jp=0..?????
-  COUNT: Cardinal;  // us=8726, eu=8734, jp=????
+  NAME: Cardinal;
+  COUNT: Cardinal;
   REAL_COUNT: Cardinal;
 
   FNAME: String;
@@ -61,7 +61,7 @@ end;
 
 procedure AddToFiles(atStream: TFileStream; atFile: String; atSize, atPadding: Cardinal);
 var
-  LoadByte: Array[0..2048] of Byte;
+  LoadByte: Array[0..2048] of Byte; // SECTOR SIZE на барабане!
   LoadFile: TFileStream;
 begin
   FillChar(LoadByte, SECTOR, $00);
@@ -102,7 +102,7 @@ begin
   COUNT:=0;
   case AnsiIndexStr(LowerCase(ParamStr(1)), ['eu', 'jp', 'us']) of
     0: begin NAME:=11048; COUNT:=8734; end; // eu
-    1: Exit('Unsupported region'); // jp
+    1: begin NAME:=10677; COUNT:=8788; end; // jp
     2: begin NAME:=24022; COUNT:=8726; end; // us
     else Exit('Unknown region');
   end;
@@ -141,7 +141,7 @@ begin
     else begin
       FSIZE:=0;
       Write('NUM=' + IntToStrEx(NUMBER, 8) + ' ');
-      Write('OFF=' + IntToHex(OFFSET, 8) + ' ');
+      Write('OFF=' + IntToHex(OFFSET, 8) + ' '); // OFFSET -> 0?..
       Write('LEN=' + IntToHex(FSIZE, 8) + ' ');
       //Write('PAD=' + IntToStrEx(PADDING, 8) + ' ');
       WriteLn;
