@@ -10,7 +10,7 @@ uses
 const
   SECTOR: Cardinal = $800;
 
-  IN_DIR: String = 'data\';
+  IN_DIR: String = 'data\'; // USRDIR
   OUT_DIR: String = 'output\';
   OUT_EXT: String = '.raw';
 
