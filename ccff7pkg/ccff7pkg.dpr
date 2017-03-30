@@ -95,20 +95,20 @@ begin
   SetConsoleTitle(PChar(ExtractFileName(ParamStr(0))));
   Title;
 
-  if (ParamCount < 1)
-  then Exit('Region not specified');
-
-  NAME:=0;
-  COUNT:=0;
-  case AnsiIndexStr(LowerCase(ParamStr(1)), ['eu', 'jp', 'us']) of
-    0: begin NAME:=11048; COUNT:=8734; end; // eu
-    1: begin NAME:=10677; COUNT:=8788; end; // jp
-    2: begin NAME:=24022; COUNT:=8726; end; // us
-    else Exit('Unknown region');
-  end;
-
   if not (DirectoryExists(IN_DIR))
   then Exit('Source dir not found');
+
+  NAME:=0;
+  for COUNT:=25000 downto 10000 do begin
+    if (FileExists(IN_DIR + IntToStrEx(COUNT, 8) + IN_EXT))
+    then begin
+      NAME:=COUNT;
+      Break;
+    end;
+  end;
+
+  if (NAME = 0)
+  then Exit('No source file found');
 
   OFFSET:=0;
   REAL_COUNT:=0;
@@ -151,7 +151,5 @@ begin
   FSE.Free;
   PKG.Free;
 
-  if (REAL_COUNT <> COUNT)
-  then Exit('Error')
-  else Exit('Done');
+  Exit(IntToStr(REAL_COUNT));
 end.
