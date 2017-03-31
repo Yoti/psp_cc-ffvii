@@ -14,8 +14,8 @@ const
 
   IN_EXT: String = '.raw';
   IN_DIR: String = 'discimg\';
-  OUT_FSE_TABLE: String = 'discimg_new.fse';
-  OUT_PKG_FILES: String = 'discimg_new.pkg';
+  OUT_FSE_TABLE: String = 'discimg.fse';
+  OUT_PKG_FILES: String = 'discimg.pkg';
 
 var
   NAME: Cardinal;
@@ -129,14 +129,16 @@ begin
 
       AddToTable(FSE, OFFSET, FSIZE, PADDING);
 
-      if ((FSIZE mod $800) <> 0)
-      then FPADDING:=(SECTOR * ((FSIZE div $800) + 1)) - FSIZE
-      else FPADDING:=0;
-      AddToFiles(PKG, FNAME, FSIZE, FPADDING);
+      if (FSIZE <> 0) then begin
+        if ((FSIZE mod $800) <> 0)
+        then FPADDING:=(SECTOR * ((FSIZE div $800) + 1)) - FSIZE
+        else FPADDING:=0;
+        AddToFiles(PKG, FNAME, FSIZE, FPADDING);
 
-      if (FSIZE mod SECTOR = 0)
-      then OFFSET:=OFFSET + (FSIZE div SECTOR) // размер ровно в N секторов
-      else OFFSET:=OFFSET + ((FSIZE div SECTOR) + 1);
+        if (FSIZE mod SECTOR = 0)
+        then OFFSET:=OFFSET + (FSIZE div SECTOR) // размер ровно в N секторов
+        else OFFSET:=OFFSET + ((FSIZE div SECTOR) + 1);
+      end;
     end
     else begin
       FSIZE:=0;
