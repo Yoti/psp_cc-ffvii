@@ -73,11 +73,11 @@ end;
 
 procedure Title;
 begin
-         //123456789_123456789_123456789_1234
-  WriteLn('**********************************');
-  WriteLn('* Crisis Core: Final Fantasy VII *');
-  WriteLn('* Game Archive Extractor by Yoti *');
-  WriteLn('**********************************');
+         //123456789_123456789_123456789_12345
+  WriteLn('***********************************');
+  WriteLn('* Crisis Core -Final Fantasy VII- *');
+  WriteLn('* Game Archive Extractor by Yoti  *');
+  WriteLn('***********************************');
 end;
 
 begin
