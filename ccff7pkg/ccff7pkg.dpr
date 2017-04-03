@@ -86,7 +86,7 @@ procedure Title;
 begin
          //123456789_123456789_123456789_12345
   WriteLn('***********************************');
-  WriteLn('* Crisis Core: Final Fantasy VII  *');
+  WriteLn('* Crisis Core -Final Fantasy VII- *');
   WriteLn('* Game Archive RePackager by Yoti *');
   WriteLn('***********************************');
 end;
