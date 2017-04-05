@@ -13,7 +13,7 @@ const
 
 var
   SIG: Cardinal;
-  IN_: TFileStream;
+  MBD: TFileStream;
 
 function Swap(Value: Cardinal): Cardinal;
 asm
@@ -38,13 +38,13 @@ end;
 
 function set_4005xxxx(s: String): Cardinal;
 begin
-  set_4005xxxx:=$40050000 + StrToInt(Copy(s, 9, 1));
+  set_4005xxxx:=$40050000 + StrToInt(Copy(s, 9, 1)) - 1;
 end;
 
 function get_4005xxxx(c: Cardinal): String;
 begin
   get_4005xxxx:=(
-    '<choise_' +
+    '<choice_' +
     IntToStr(StrToInt('$' + Copy(inttohex(c, 8), 7, 2)) + 1) +
     'vars>'
   );
@@ -164,7 +164,7 @@ begin
     $01000000: Decode:='<block>'; // блок?
     $0C000000: Decode:='<begin>'+#13#10; // текст
 
-    $40020000: Decode:=#13#10+'<newstr>'+#13#10; // перенос строки
+    $40020000: Decode:=#13#10; // перенос строки
     $40050001..$40050009: Decode:=get_4005xxxx(Swap(Char))+#13#10; // варианты ответа
     $40040000: Decode:='<end>'; // конец
 
@@ -177,13 +177,14 @@ var
   s: String;
   i: Cardinal;
   len: Cardinal;
+  in_: TFileStream;
   out_: TStringList;
   in_Char: Cardinal;
 begin
-  IN_:=TFileStream.Create(FilePath, fmOpenRead);
+  in_:=TFileStream.Create(FilePath, fmOpenRead);
   out_:=TStringList.Create;
   while (IN_.Position < IN_.Size) do begin
-    IN_.Read(in_Char, SizeOf(Cardinal));
+    in_.Read(in_Char, SizeOf(Cardinal));
     if (in_Char = Swap($01000000))
     then begin
       out_.Add('<block>');
@@ -199,7 +200,90 @@ begin
   end;
   out_.SaveToFile(ChangeFileExt(FilePath, '.txt'));
   out_.Free;
-  IN_.Free;
+  in_.Free;
+
+  Exit('Done');
+end;
+
+procedure ToBase(FilePath: String);
+var
+  i, t, l: Cardinal;
+  in_: TStringList;
+  out_: TFileStream;
+
+  block_size: Cardinal;
+  return_to_position: Cardinal;
+  block_size_position: Cardinal;
+begin
+  t:=Swap(BASE_SIG);
+  block_size_position:=0;
+
+  out_:=TFileStream.Create(ChangeFileExt(FilePath, '_new.mbd'), fmCreate);
+  in_:=TStringList.Create;
+    in_.LoadFromFile(FilePath);
+
+    for i:=0 to in_.Count-1 do begin
+      if (in_.Strings[i] <> '') then begin
+        // sig
+        if (in_.Strings[i] = 'MBD~')
+        then begin
+          WriteLn(IntToHex(t, 8));
+          out_.Write(t, SizeOf(Cardinal));
+        end
+
+        // block
+        else if (in_.Strings[i] = '<block>')
+        then begin
+          WriteLn('<');
+          t:=Swap($01000000); // block
+          out_.Write(t, SizeOf(Cardinal));
+          block_size:=0;
+          block_size_position:=out_.Position;
+          t:=Swap($594F5449); // temp for size of block
+          out_.Write(t, SizeOf(Cardinal));
+        end
+
+        else if (in_.Strings[i] = '<end>')
+        then begin
+          return_to_position:=out_.Position;
+          out_.Seek(block_size_position, 0);
+          out_.Write(block_size, SizeOf(Cardinal));
+          out_.Seek(return_to_position, 0);
+
+          WriteLn('<');
+          t:=Swap($40040000); // end
+          out_.Write(t, SizeOf(Cardinal));
+        end
+
+        // command
+        // любая команда кроме block и end находится
+        // внутри и прибавляет к размеру секции 1
+        else if (in_.Strings[i][1] = '<')
+        then begin
+          WriteLn('<');
+          t:=$11111111;
+          Inc(block_size);
+          out_.Write(t, SizeOf(Cardinal));
+        end
+
+        // text
+        else
+        begin
+          t:=$22222222; // char
+          for l:=1 to Length(in_.Strings[i]) do begin
+            Write('t');
+            Inc(block_size);
+            out_.Write(t, SizeOf(Cardinal));
+          end;
+          WriteLn;
+          t:=Swap($40020000); // new line
+          Inc(block_size);
+          out_.Write(t, SizeOf(Cardinal));
+        end;
+      end;
+    end;
+  in_.Free;
+  out_.Free;
 
   Exit('Done');
 end;
@@ -209,7 +293,7 @@ begin
          //123456789_123456789_123456789_12345
   WriteLn('***********************************');
   WriteLn('* Crisis Core -Final Fantasy VII- *');
-  WriteLn('*   MDB Database Editor by Yoti   *');
+  WriteLn('*   MBD Dialogs Editor by Yoti    *');
   WriteLn('***********************************');
 end;
 
@@ -223,15 +307,13 @@ begin
   if not (FileExists(ParamStr(1)))
   then Exit('No input file');
 
-  IN_:=TFileStream.Create(ParamStr(1), fmOpenRead);
-    IN_.Read(SIG, SizeOf(Cardinal));
-  IN_.Free;
+  MBD:=TFileStream.Create(ParamStr(1), fmOpenRead);
+    MBD.Read(SIG, SizeOf(Cardinal));
+  MBD.Free;
 
   if (Swap(SIG) = BASE_SIG)
   then ToText(ParamStr(1))
   else if (Swap(SIG) = TEXT_SIG)
-  then WriteLn('debug: text')
+  then ToBase(ParamStr(1))
   else Exit('Unknown file');
-
-  ReadLn;
 end.
