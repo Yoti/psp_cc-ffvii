@@ -50,9 +50,27 @@ begin
   );
 end;
 
-function Encode(Str: String): Cardinal;
+function Encode(Char: Byte): Cardinal;
 begin
-  Encode:=0;
+  case Char of
+  $21: Encode:=$80003E00; // '!'
+  $3F: Encode:=$80003F00; // '?'
+  $20: Encode:=$80004000; // ' '
+  $22: Encode:=$80004100; // '"'
+  $27: Encode:=$80004200; // ''''
+  $2C: Encode:=$80004300; // ','
+  $2E: Encode:=$80004400; // '.'
+  $3A: Encode:=$80004500; // ':'
+  $3B: Encode:=$80004600; // ';'
+  $2D: Encode:=$80004700; // '-'
+  $2F: Encode:=$80004800; // '/'
+  $28: Encode:=$80004900; // '('
+  $29: Encode:=$80004A00; // ')'
+  $30..$39: Encode:=$80003400 + (Char - $30) * $100; // 0..9
+  $41..$5A: Encode:=$80000000 + (Char - $41) * $100; // A..Z
+  $61..$7A: Encode:=$80001A00 + (Char - $61) * $100; // a..z
+  else Encode:=$80003F00; // '?'
+  end;
 end;
 
 function Decode(Char: Cardinal): String;
@@ -227,14 +245,14 @@ begin
         // sig
         if (in_.Strings[i] = 'MBD~')
         then begin
-          WriteLn(IntToHex(t, 8));
+          //WriteLn(IntToHex(t, 8));
           out_.Write(t, SizeOf(Cardinal));
         end
 
         // block
         else if (in_.Strings[i] = '<block>')
         then begin
-          WriteLn('<');
+          //WriteLn('<');
           t:=Swap($01000000); // block
           out_.Write(t, SizeOf(Cardinal));
           block_size:=0;
@@ -243,6 +261,7 @@ begin
           out_.Write(t, SizeOf(Cardinal));
         end
 
+        // block
         else if (in_.Strings[i] = '<end>')
         then begin
           return_to_position:=out_.Position;
@@ -250,28 +269,43 @@ begin
           out_.Write(block_size, SizeOf(Cardinal));
           out_.Seek(return_to_position, 0);
 
-          WriteLn('<');
+          //WriteLn('<');
           t:=Swap($40040000); // end
           out_.Write(t, SizeOf(Cardinal));
         end
 
-        // command
+        // begin
+        else if (in_.Strings[i] = '<begin>')
+        then begin
+          //WriteLn('<');
+          t:=Swap($0C000000);
+          Inc(block_size);
+          out_.Write(t, SizeOf(Cardinal));
+        end
+
+        // choice
+        else if (Pos('<choice_', in_.Strings[i]) = 1)
+        then begin
+          //WriteLn('<');
+          t:=Swap(set_4005xxxx(in_.Strings[i]));
+          Inc(block_size);
+          out_.Write(t, SizeOf(Cardinal));          
+        end
+
+        // temp command
         // любая команда кроме block и end находится
         // внутри и прибавляет к размеру секции 1
         else if (in_.Strings[i][1] = '<')
         then begin
-          WriteLn('<');
-          t:=$11111111;
-          Inc(block_size);
-          out_.Write(t, SizeOf(Cardinal));
+          Exit('Unknown command');
         end
 
         // text
         else
         begin
-          t:=$22222222; // char
           for l:=1 to Length(in_.Strings[i]) do begin
-            Write('t');
+            t:=Swap(Encode(Ord(in_.Strings[i][l]))); // char
+            Write(Decode(t));
             Inc(block_size);
             out_.Write(t, SizeOf(Cardinal));
           end;
