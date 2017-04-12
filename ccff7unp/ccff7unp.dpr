@@ -22,7 +22,7 @@ var
   Padding: Cardinal;
   FileSize: Cardinal;
 
-  Count: Cardinal;
+  Count: Integer;
   Files: Cardinal;
   RealCount: Cardinal;
 
@@ -117,7 +117,14 @@ begin
     if (FileSize > 0)
     then begin
       Inc(RealCount);
-      Dump(PKG,
+
+	  if (ParamCount = 0)
+    then Dump(PKG,
+          OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
+          Start * SECTOR,
+          FileSize)
+    else if (StrToInt(ParamStr(1)) = Count)
+    then Dump(PKG,
           OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
           Start * SECTOR,
           FileSize);
