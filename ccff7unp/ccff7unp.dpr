@@ -120,16 +120,21 @@ begin
     then begin
       Inc(RealCount);
 
-	  if (ParamCount = 0)
+    if (ParamCount = 0)
     then Dump(PKG,
-          OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
-          Start * SECTOR,
-          FileSize)
+         OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
+         Start * SECTOR,
+         FileSize)
     else if (StrToInt(ParamStr(1)) = Count)
-    then Dump(PKG,
-          OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
-          Start * SECTOR,
-          FileSize);
+    then
+      begin
+        Dump(PKG,
+        OUT_DIR + IntToStrEx(Count, 8) + OUT_EXT,
+        Start * SECTOR,
+        FileSize);
+
+        Break;
+      end;
     end;
   end;
   PKG.Free;
