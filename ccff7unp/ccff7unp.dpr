@@ -90,8 +90,10 @@ begin
   if not (FileExists(IN_DIR + PKG_FILES))
   then Exit('Files not found');
 
-  if (DirectoryExists(OUT_DIR))
-  then Exit('Already unpacked');
+  if (ParamCount = 0) then begin
+    if (DirectoryExists(OUT_DIR))
+    then Exit('Already unpacked');
+  end;
 
   if not (DirectoryExists(OUT_DIR))
   then MkDir(OUT_DIR);
