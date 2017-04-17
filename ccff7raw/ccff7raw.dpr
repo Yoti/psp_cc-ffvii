@@ -69,11 +69,11 @@ begin
   if not (FileExists(ParamStr(1)))
   then Exit('File not found');
 
-  if not (FileExists(ChangeFileExt(ParamStr(1), '.txt'))) // .lst
+  if not (FileExists(ChangeFileExt(ParamStr(1), '.lst')))
   then Exit('Table not found');
 
   LST:=TStringList.Create;
-  LST.LoadFromFile(ChangeFileExt(ParamStr(1), '.txt'));
+  LST.LoadFromFile(ChangeFileExt(ParamStr(1), '.lst'));
   RAW:=TFileStream.Create(ParamStr(1), fmOpenRead);
     //WriteLn(' #' + IntToStr(LST.Count));
     if (LST.Count < 2)
@@ -88,8 +88,10 @@ begin
       //WriteLn(' >>' + Copy(LST.Strings[i], 10, 8));
       Dump(RAW,
           ExtractFileNameEx(ParamStr(1)) + '_' + IntToStrEx(i, 8) + '.chk',
-          StrToInt(Copy(LST.Strings[i], 1, 8)),
-          StrToInt(Copy(LST.Strings[i], 10, 8)));
+          StrToInt('$' + Copy(LST.Strings[i], 1, 8)),
+          StrToInt('$' + Copy(LST.Strings[i], 10, 8)));
+
+      WriteLn(ExtractFileNameEx(ParamStr(1)) + '_' + IntToStrEx(i, 8) + '.chk');
     end;
   LST.Free;
   RAW.Free;
